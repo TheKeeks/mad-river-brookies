@@ -1,0 +1,38 @@
+[
+ {
+  "name": "Fayston Elementary School lot (German Flats Rd)",
+  "lat": "44.179671",
+  "lng": "-72.885404",
+  "how": "Nominatim OSM way/569773662: Fayston Elementary School, 782, German Flats Road, Fayston, Warren, Washington C"
+ },
+ {
+  "name": "Austin Brook Trail / Forest Road 25 gate",
+  "lat": "44.063419",
+  "lng": "-72.855194",
+  "how": "Austin Brook VHD line, downstream end (mouth at Rte 100) - FR 25 gate not in OSM, verify on site"
+ },
+ {
+  "name": "Warren village - covered bridge / Main St",
+  "lat": "44.111141",
+  "lng": "-72.857004",
+  "how": "Nominatim OSM way/1020925958: Warren Covered Bridge, Covered Bridge Road, Warren, Washington County, Vermont, "
+ },
+ {
+  "name": "Mad River Greenway - Tremblay Rd parking (Waitsfield)",
+  "lat": "44.204202",
+  "lng": "-72.806929",
+  "how": "Nominatim OSM way/19728207 (Tremblay Rd), vertex nearest the Mad River VHD line"
+ },
+ {
+  "name": "Roxbury Gap Rd / Warren Mountain Rd (the gap)",
+  "lat": "44.109423",
+  "lng": "-72.787851",
+  "how": "Nominatim OSM node/205084130: Roxbury Gap, Warren, Washington County, Vermont, United States"
+ },
+ {
+  "name": "Moss Glen Falls pull-off (Granville Gulf, Rte 100)",
+  "lat": "44.018022",
+  "lng": "-72.850075",
+  "how": "Nominatim OSM node/1951272330: Moss Glen Falls, Granville, Addison County, Vermont, 05747, United States"
+ }
+]
