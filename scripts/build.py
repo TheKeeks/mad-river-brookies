@@ -364,7 +364,9 @@ def build(check=False):
         "geocoded": sum(1 for r in streams + access if r["coord_source"].startswith("geocoded")),
     }
     meta = {
-        "generated": dt.date.today().isoformat(),
+        # stamped with the committed data-fetch date (not today) so rebuilding on another day
+        # gives byte-identical exports and `--check` stays meaningful in CI
+        "generated": drive.get("fetched") or dt.date.today().isoformat(),
         "inn": INN, "bbox": BBOX, "pdf_url": PDF_URL, "pdf_local": PDF_LOCAL,
         "report": "Ladago, B. (2017). 2017 Upper Winooski Fisheries Assessment. Vermont Fish & Wildlife Department, 2017-12-15.",
         "species": SPECIES, "access_types": ACCESS_TYPES, "poi_categories": POI_CATS,
