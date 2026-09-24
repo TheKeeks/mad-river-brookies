@@ -76,7 +76,8 @@ re-download. The script is polite (one request at a time, project User-Agent, st
 
 With Playwright installed (`npm i -D playwright`), `node scripts/test_browser.js` opens the
 page at 375×812 over http and `file://`, exercises presets, cards, Plan, search, a line tap,
-and checks the in-browser exports match `exports/`.
+and checks the in-browser exports match `exports/`. GitHub Actions (`.github/workflows/ci.yml`)
+runs the build check and this test on every push.
 
 ## Import into other apps
 
