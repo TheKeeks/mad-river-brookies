@@ -1,0 +1,31 @@
+# Validates the CSVs, checks the committed exports are current, and runs the browser
+# acceptance test. Publishing is GitHub Pages "Deploy from a branch" (main, root) — see README.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Validate CSVs and check committed exports are current
+        run: python3 scripts/build.py --check
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm i --no-save playwright@1.56.1 >/dev/null
+          npx playwright install --with-deps chromium
+      - name: Browser acceptance test (http and file://)
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
+          sleep 1
+          node scripts/test_browser.js http://127.0.0.1:8765/index.html
