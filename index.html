@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b3a2f">
+<meta name="description" content="Wild brook trout waters around Warren and Waitsfield, Vermont: VFWD 2017 survey points, stream lines, trailheads, parking and river access, with directions from the inn.">
+<title>Mad River Brookies</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%232e7d32'/%3E%3Cpath d='M4 12c3-4 7-6 11-4l3-3v4l2 3-2 3v4l-3-3c-4 2-8 0-11-4z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="iconbtn" id="btn-menu" aria-label="Info and legend" title="Info">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
+    </button>
+    <div class="brand">
+      <span class="brand-name">Mad River Brookies</span>
+      <span class="brand-sub" id="live-line">VFWD 2017 wild trout waters · Warren / Waitsfield</span>
+    </div>
+    <button class="iconbtn" id="btn-locate" aria-label="Where am I" title="Where am I">
+      <svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1a9 9 0 0 0 7.9-7.9H23v-2zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg>
+    </button>
+  </header>
+
+  <div class="searchbar">
+    <svg class="search-ico" viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+    <input id="search" type="search" placeholder="Search streams, lots, trailheads…" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+    <button class="clear" id="search-clear" aria-label="Clear search">×</button>
+    <ul id="search-results" class="results" hidden></ul>
+  </div>
+
+  <div class="chips" id="presets">
+    <button class="chip" data-preset="basics">Brookie basics</button>
+    <button class="chip" data-preset="dog">Dog River side</button>
+    <button class="chip" data-preset="all">Everything</button>
+    <button class="chip chip-ghost" id="btn-layers">Layers ▾</button>
+  </div>
+
+  <main id="map" role="application" aria-label="Map"></main>
+
+  <div class="mapbtns">
+    <button class="mapbtn" id="btn-basemap" title="Switch basemap" aria-label="Switch basemap">
+      <svg viewBox="0 0 24 24"><path d="M12 2 2 8l10 6 10-6-10-6zm0 2.3L18.6 8 12 12 5.4 8 12 4.3zM2 12l10 6 10-6-1.9-1.1L12 15.8 3.9 10.9 2 12zm0 4 10 6 10-6-1.9-1.1L12 19.8 3.9 14.9 2 16z"/></svg>
+    </button>
+    <button class="mapbtn" id="btn-home" title="Back to the inn" aria-label="Back to the inn">
+      <svg viewBox="0 0 24 24"><path d="M4 12 12 4l8 8v8h-5v-5h-6v5H4z"/></svg>
+    </button>
+    <button class="mapbtn" id="btn-export" title="Export GPX / KML / CSV / GeoJSON" aria-label="Export">
+      <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18-5.5 5.5 1.4 1.4L11 5.8V16h2V5.8l3.1 3.1 1.4-1.4L12 2z"/></svg>
+    </button>
+  </div>
+
+  <nav class="tabbar" role="tablist">
+    <button class="tab active" data-tab="map" role="tab"><svg viewBox="0 0 24 24"><path d="m15 3-6 2-6-2v18l6 2 6-2 6 2V5l-6-2zm0 2.4 4 1.3v13.9l-4-1.3V5.4zM9 7.4l4-1.3v13.9l-4 1.3V7.4zM5 5.4l2 .7v13.9l-2-.7V5.4z"/></svg><span>Map</span></button>
+    <button class="tab" data-tab="plan" role="tab"><svg viewBox="0 0 24 24"><path d="M3 5h18v2H3zm0 6h12v2H3zm0 6h18v2H3z"/></svg><span>Plan</span></button>
+    <button class="tab" data-tab="layers" role="tab"><svg viewBox="0 0 24 24"><path d="M12 2 2 8l10 6 10-6-10-6zM2 12l10 6 10-6-1.9-1.1L12 15.8 3.9 10.9 2 12zm0 4 10 6 10-6-1.9-1.1L12 19.8 3.9 14.9 2 16z"/></svg><span>Layers</span></button>
+    <button class="tab" data-tab="info" role="tab"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg><span>Info</span></button>
+  </nav>
+
+  <!-- Bottom sheet: feature cards, export, long-press form -->
+  <section class="sheet" id="sheet" aria-live="polite">
+    <div class="grip" id="sheet-grip"><span></span></div>
+    <button class="sheet-close" id="sheet-close" aria-label="Close">×</button>
+    <div class="sheet-body" id="sheet-body"></div>
+  </section>
+
+  <!-- Panels -->
+  <section class="panel" id="panel-plan" hidden>
+    <div class="panel-head">
+      <h2>Plan</h2>
+      <div class="segmented" id="plan-scope">
+        <button data-scope="mad" class="on">Mad River</button>
+        <button data-scope="dog">Dog River</button>
+        <button data-scope="all">All</button>
+      </div>
+      <div class="filters">
+        <label class="check"><input type="checkbox" id="plan-b1"> B1 only</label>
+        <label class="check"><input type="checkbox" id="plan-bkt"> Brookies only</label>
+        <label class="check"><input type="checkbox" id="plan-fromhere"> From my location</label>
+      </div>
+    </div>
+    <ol class="plan-list" id="plan-list"></ol>
+  </section>
+
+  <section class="panel" id="panel-layers" hidden>
+    <div class="panel-head"><h2>Layers</h2></div>
+    <div class="panel-scroll">
+      <h3>Basemap</h3>
+      <div class="segmented" id="basemap-seg">
+        <button data-base="osm" class="on">OpenStreetMap</button>
+        <button data-base="topo">OpenTopoMap</button>
+      </div>
+      <h3>Filter</h3>
+      <div class="segmented" id="scope-seg">
+        <button data-scope="mad" class="on">Mad River</button>
+        <button data-scope="dog">Dog River</button>
+        <button data-scope="all">Whole report</button>
+      </div>
+      <h3>Overlays</h3>
+      <ul class="layer-list" id="layer-list"></ul>
+      <h3>Export</h3>
+      <p class="muted small">Same files as <code>exports/</code> in the repo. Temperature sites are included only when that layer is on.</p>
+      <div class="btnrow" id="export-btns">
+        <button class="btn" data-export="gpx">GPX</button>
+        <button class="btn" data-export="kml">KML</button>
+        <button class="btn" data-export="csv">CSV</button>
+        <button class="btn" data-export="geojson">GeoJSON</button>
+      </div>
+      <p class="muted small">GPX → Gaia / onX / Garmin. KML → Google My Maps (Import). Open in Apple Maps per pin from a card.</p>
+      <h3>Add a point</h3>
+      <p class="muted small">Long-press the map to get a ready-to-paste CSV row for a new stream or access point. <a href="cheatsheet.html">Printable cheat sheet</a>.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-info" hidden>
+    <div class="panel-head"><h2>About this map</h2></div>
+    <div class="panel-scroll" id="info-body"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="data/spots.js"></script>
+<script src="data/overlays.js"></script>
+<script src="exporters.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mad River Brookies — cheat sheet</title>
+<style>
+  @page { size: letter; margin: 10mm; }
+  body { font: 11px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #16241d; margin: 12px; }
+  h1 { font-size: 18px; margin: 0 0 2px; }
+  .sub { color: #4d5c55; margin-bottom: 8px; }
+  .controls { margin: 8px 0 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .controls button, .controls select { font: inherit; height: 32px; padding: 0 10px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border-bottom: 1px solid #dfe5e1; padding: 4px 6px; vertical-align: top; text-align: left; }
+  th { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #4d5c55; }
+  td.n { font-weight: 700; }
+  td.min { font-size: 16px; font-weight: 800; text-align: center; white-space: nowrap; }
+  .sp { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .b1 { background: #16241d; color: #fff; font-weight: 800; font-size: 9px; padding: 1px 4px; border-radius: 4px; }
+  .qr { width: 62px; height: 62px; }
+  .qr svg { width: 62px; height: 62px; }
+  .small { color: #4d5c55; font-size: 10px; }
+  .foot { margin-top: 10px; font-size: 10px; color: #4d5c55; }
+  @media print { .controls { display: none; } body { margin: 0; } tr { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+<h1>Mad River brookies — morning cheat sheet</h1>
+<div class="sub" id="sub"></div>
+<div class="controls">
+  <label>Scope <select id="scope"><option value="mad">Mad River</option><option value="dog">Dog River</option><option value="all">Whole report</option></select></label>
+  <label><input type="checkbox" id="b1only"> B1 only</label>
+  <button onclick="window.print()">Print</button>
+  <a href="index.html">← back to the map</a>
+</div>
+<table id="t"><thead><tr><th>Drive</th><th>Stream</th><th>Species</th><th>Nearest lot · walk</th><th>Notes</th><th>Directions</th></tr></thead><tbody></tbody></table>
+<div class="foot" id="foot"></div>
+<script src="vendor/qrcode/qrcode.min.js"></script>
+<script src="data/spots.js"></script>
+<script>
+(function () {
+  var S = window.SPOTS, M = S.properties, INN = M.inn;
+  var MAD = {}; S.features.forEach(function (f) { if (f.properties.watershed === 'Mad River') MAD[f.properties.name] = 1; });
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function gDir(lat, lng) { return 'https://www.google.com/maps/dir/?api=1&origin=' + INN.lat + ',' + INN.lng + '&destination=' + lat + ',' + lng + '&travelmode=driving'; }
+  function qr(url) {
+    try { var q = qrcode(0, 'M'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 2, margin: 0, scalable: true }); } catch (e) { return '<span class="small">' + esc(url) + '</span>'; }
+  }
+  function inScope(p, scope) {
+    if (scope === 'all') return true;
+    if (scope === 'mad') return p.huc10 === 'Mad River' || p.watershed === 'Mad River';
+    return (p.huc10 || '').indexOf('Dog River') === 0 || p.watershed === 'Dog River';
+  }
+  function render() {
+    var scope = document.getElementById('scope').value, b1 = document.getElementById('b1only').checked;
+    var rows = S.features.filter(function (f) { var p = f.properties; return (p.layer === 'b1_water' || p.layer === 'narrative_only') && inScope(p, scope) && (!b1 || p.b1); });
+    rows.sort(function (a, b) { return a.properties.drive_min - b.properties.drive_min; });
+    document.getElementById('sub').textContent = 'From ' + INN.name + ' · drive times ' + (M.drive_source || '') + ' · ' + rows.length + ' streams · VFWD 2017';
+    var tb = document.querySelector('#t tbody');
+    tb.innerHTML = rows.map(function (f) {
+      var p = f.properties, a = (p.nearest_access || [])[0], c = f.geometry.coordinates;
+      var dest = a ? [a.lat, a.lng] : [c[1], c[0]];
+      var url = gDir(dest[0], dest[1]);
+      return '<tr><td class="min">' + Math.round(p.drive_min) + '<div class="small">min' + (p.drive_src === 'est.' ? ' est.' : '') + '</div></td>' +
+        '<td class="n">' + esc(p.name) + (p.b1 ? ' <span class="b1">B1</span>' : '') + (p.confidence === 'low' ? ' <span class="small">(verify)</span>' : '') + (p.private_flag ? ' 🔒' : '') + '<div class="small">' + c[1].toFixed(5) + ', ' + c[0].toFixed(5) + '</div></td>' +
+        '<td><span class="sp" style="background:' + p.color + '"></span>' + esc(p.species_label) + '</td>' +
+        '<td>' + (a ? esc(a.name) + '<div class="small">' + a.walk_m + ' m walk · ' + Math.round(a.drive_min) + ' min drive</div>' : '<span class="small">none within 3 km</span>') + '</td>' +
+        '<td class="small">' + esc(cap((p.notes || '').replace(/^REPORT COORDINATE PROBLEM:.*?Report: /, ''))).slice(0, 160) + '</td>' +
+        '<td><div class="qr">' + qr(url) + '</div></td></tr>';
+    }).join('');
+    document.getElementById('foot').innerHTML = 'QR = Google Maps driving directions from the inn to the nearest lot (or to the stream point). Season: 2nd Sat in April – Oct 31 for harvest; catch-and-release with artificials most of the rest of the year — verify current regs. No cell service at Lincoln Gap, App Gap, Big Basin Rd, Granville Gulf. Source: ' + esc(M.report);
+  }
+  document.getElementById('scope').addEventListener('change', render);
+  document.getElementById('b1only').addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
